@@ -1,0 +1,18 @@
+Select * FROM OPENQUERY(AS400,'Select ''NS'' || right(''0000'' || h.stinvn,4) as invoiceNo,h.stinvd as InvoiceDate,CYGSSC as Customer,
+c.cnme as CustomerName, h.statn as DeTo,p.IDSCE as desc,d.tlnet as Price,d.tlqty as QTY,
+d.tlnet*d.tlqty as Amount,h.sttax as VAt,
+d.tlta10 FC, 
+d.tlta10 * d.tlqty as AmountFC 
+From {0}.siht8 h inner join {0}.silt8 d On stinvn = tlinvn
+Left Join {0}.trcm c On h.stbtcd = c.ccust 
+Left Join {0}.tiim p On left(d.tlprod,10) = left(p.iprod,10)  
+inner join {0}.sih th on th.siinvn = h.stord
+Inner Join {0}.ech o On th.siord = o.hord  
+WHERE hstat in (''7'',''8'')  AND (stinvd >= {1}) AND (stinvd <= {2}) 
+Order By Customer, invoiceno, InvoiceDate
+')
+ 
+
+
+ 
+ 

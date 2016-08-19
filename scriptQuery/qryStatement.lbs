@@ -1,0 +1,7 @@
+select SDDONO INVNO,SDDATE INVDATE,STCST COST,TLQTY,STTAX,STTOT Amount,SDNO
+ from TYNSSALE_D.YSTH 
+inner join TYNSSALE_D.YSTD ON SHNO = SDNO  
+inner join TYNSSALE_D.SIHT8 H ON 'NS' || RIGHT('0000' || H.STINVN,4) = SDDONO 
+inner join (select tlinvn ,sum(tlqty) tlqty from TYNSSALE_D.silt8
+			group by tlinvn) D ON H.STINVN = D.TLINVN
+Where STINVD between {0} and {1}

@@ -1,0 +1,65 @@
+<%@ Master Language="C#" CodeFile="MasterPage.master.cs" Inherits="MasterPage" EnableViewState="false" %><!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>Web Site Name</title>
+    <link rel="stylesheet" href="App_Themes/Theme1/style2.css" />
+</head>
+<body>
+    <div class="BodyContent">
+
+    <div class="BorderBorder"><div class="BorderBL"><div></div></div><div class="BorderBR"><div></div></div><div class="BorderTL"></div><div class="BorderTR"><div></div></div><div class="BorderT"></div><div class="BorderR"><div></div></div><div class="BorderB"><div></div></div><div class="BorderL"></div><div class="BorderC"></div><div class="Border">
+
+        <div class="Header">
+          <div class="HeaderTitle">
+            <h1><a href="#">Web Site Name</a></h1>
+            <h2>Subtitle</h2>
+          </div>
+        </div><div class="Columns"><div class="Column1"><div class="Block">
+
+            <span class="BlockHeader"><span>Search This Site</span></span>
+            <div class="BlockContentBorder">
+
+                <input type="text" style="width:120px" />
+                <span class="ButtonInput"><span><input type="button" value="Search" /></span></span>
+
+            </div>
+
+        </div>
+
+        <div class="Block">
+
+            <span class="BlockHeader"><span>Links</span></span>
+            <div class="BlockContentBorder">
+                
+                <ul>
+                    <li><asp:Label runat="server" Text="TYE" ID="lb1"></asp:Label></li>
+                    <ul>
+                    <li><a href="TYE/tyecheckcap/tyeplan.aspx">Check Capacity</a></li>
+                    <li><a href="TYE/UploadInvoiceToYGSS/DataTransfer.aspx">Tranfer Invoice To YGSS</a></li>
+                    <li><a href="#">Test Link 3</a></li>
+                    </ul>
+                    <li><asp:Label runat="server" Text="TMP" ID="Label1"></asp:Label></li>
+                    <li><a href="#">Test Link 3</a></li>
+                   
+                </ul>
+                
+
+            </div>
+
+        </div>
+
+        </div><div class="MainColumn"><div class="Article">
+
+            <asp:ContentPlaceHolder id="Content" runat="server" />
+
+        </div></div></div>
+        <div class="Footer">
+    &nbsp;<a href="#">Contact Us</a>
+        </div>                
+
+    </div>
+    </div>
+    <span class="RushTideLink"><a href="http://rushtide.com">Web Template</a> created using Rush Tide.</span>
+    &nbsp;
+</body>
+</html>

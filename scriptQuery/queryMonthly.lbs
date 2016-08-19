@@ -1,0 +1,15 @@
+Select * FROM OPENQUERY(AS400,'Select ''S'' || right(''0000'' || h.siinvn,5) as invoiceNo,h.siinvd as InvoiceDate,CYGSSC as Customer,
+        c.cnme as CustomerName, h.siatn as DeTo,p.IDSCE as desc,d.ilnet as Price,d.ilqty as QTY,
+d.ilnet*d.ilqty as Amount,h.sitax as VAt,
+case when (p.IDSCE like ''%TACHOGRAPH SET%'' or p.IDSCE like ''%YAZAKI GPS%'') then d.ilta10 + 1000 else d.ilta10 end as FC, 
+case when (p.IDSCE like ''%TACHOGRAPH SET%'' or p.IDSCE like ''%YAZAKI GPS%'') then (d.ilta10 + 1000) * d.ilqty 
+else d.ilta10 * d.ilqty end as AmountFC
+From {0}.sih h inner join {0}.sil d On siinvn = ilinvn
+Left Join {0}.trcm c On h.sicust = c.ccust 
+Left Join {0}.tiim p On left(d.ilprod,10) = left(p.iprod,10)  
+Inner Join {0}.ech o On h.siord = o.hord 
+WHERE hstat in (''7'',''8'') AND (siinvd >= {1}) AND (siinvd <= {2}) 
+and  siinvn not in
+(select siinvn from TYNSSALE_D.sih group by siinvn 
+having count(siinvn) > 1)
+Order By Customer, DeTo, invoiceno, InvoiceDate ')

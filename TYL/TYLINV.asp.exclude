@@ -1,0 +1,142 @@
+<!-- #INCLUDE file="FunctionDB.inc" -->
+<!-- #include file = "ScriptLibrary/Conn_Func.asp" -->
+<!-- #include file = "ScriptLibrary/Global_Var.asp"-->
+
+<script language="JavaScript" src="date-picker.js"></script>
+<script language="VBScript" src="CheckDate.vbs"></script>
+<script language="JavaScript">
+
+
+function SearchPopupFrProductType()	{
+	Destination=  Printinv.FrProductType;
+	window.open('SearchProductTypeNow.asp','SearchProductType','menubar=no,toolbar=no,width=750,height=550,scrollbars=yes');
+}	
+
+function SearchPopupToProductType()	{
+	Destination=  Printinv.ToProductType;
+	window.open('SearchProductTypeNow.asp','SearchProductType','menubar=no,toolbar=no,width=750,height=550,scrollbars=yes');
+}	
+</script>
+
+<script language="Javascript">
+	function PrintReport() {		
+
+		printbr = open('','Printinv');
+		printbr.document.writeln("<html><head><title>TMP Invoice Detial Listing Report </title></head><body>");
+		printbr.document.write("<form name=tSearch method=post action='TYLINVPrint.asp'>");				
+		printbr.document.write("<input type=hidden name= FrMonth    value='" +  Printinv.FRMonth.value + "'>");
+		printbr.document.write("<input type=hidden name= ToMonth value='" +  Printinv.ToMonth.value + "'>");
+		printbr.document.write("</form>");
+		printbr.document.write("<scr");
+		printbr.document.writeln("ipt language='JavaScript'>");
+		printbr.document.write("tSearch.submit()");
+		printbr.document.write("</scr");
+		printbr.document.writeln("ipt>");
+		printbr.document.writeln("</body></html>");		
+	}
+	
+</script>
+ 
+<script language="VBScript">
+<!--		
+	Function CheckMonth()
+		if  (Printinv.Frmonth.value = "" ) OR (Printinv.ToMonth.value = "" ) then
+			 msgbox "Please enter valided From Month and To Month  field  and try again.",vbokonly,"Not Complete"
+			Exit Function		
+		elseif  Printinv.FrMonth.value >  Printinv.ToMonth.value  then
+			 msgbox "Please check month.",vbokonly,"Invalid Data"
+			Exit Function		
+		end if
+		call PrintReport() 
+	End Function
+
+	Function SetToCustomer()
+		if  Printinv.ToCustomer.value = "" then
+			 Printinv.ToCustomer.value =  Printinv.FrCustomer.value
+		end if
+	End Function
+	
+	Function SetToCarMaker()
+		if  Printinv.ToCarMaker.value = "" then
+			Printinv.ToCarMaker.value =  Printinv.FrCarMaker.value
+		end if
+	End Function
+
+	Function SetToProductType()
+		if  Printinv.ToProductType.value = ""  then
+			Printinv.ToProductType.value =  Printinv.FrProductType.value
+		end if
+	End Function
+
+	Function SetToProductCode()
+		if  Printinv.ToProductCode.value = "" then
+			Printinv.ToProductCode.value =  Printinv.FrProductCode.value
+		end if
+	End Function
+	
+	Function setToBLDate()
+		if  Printinv.ToBLDate.value = "" then
+			Printinv.TOBLDate.value =  Printinv.FRBLDate.value
+		end if
+	End Function
+//-->
+</script>
+<%
+	SalesCode       = Request.Form("Sales")
+	FrProductType = Request.Form("FrProductType")
+	ToProductType = Request.Form("ToProductType")
+	FrMonth       = Request.Form("FrMonth")
+	ToMonth       = Request.Form("ToMonth")
+%>
+<HTML>
+<HEAD>
+	<title>TYL Invoice Detial Listing Report </title>
+        <!--#include virtual ="salesweb/tMpm1.asp" -->
+        <!--#include virtual ="salesweb/tMpm2.asp" -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"></HEAD>
+<BODY leftmargin=20>
+<%
+	if len(Session("userName"))=0 then
+		response.redirect("SessionOut.asp")
+	end if
+%>
+	<table width=100% cellspacing=0 cellpadding=0>
+	<tr valign=top>
+		<td class=Head1>TYL Invoice Detial Listing Report </td>
+		<td>
+		<table align=right>
+			<tr>
+				<td colspan=2 align=right><a href='tMpmenu.asp'><img src="IMAGES/GoToMenu.gif" border=0></a></td>	</tr>
+			<tr>
+					<th class=Head2></th>
+					<td class=Head3></td></tr>
+			<tr>
+					<th class=Head2></th>
+					<td class=Head3></td></tr>
+		</table></td></tr>
+	</table>
+	<form name="Printinv" method="post" action="TYLINVPrint.asp" >
+	<table width=100% cellspacing=0 cellpadding=0>
+		<tr valign=top><td align=left>
+		<table align=left width=547>
+	<tr>
+		<td  class=Head2 align="right" nowrap><b>From  Month : </b></td>
+		<td  class=Head3 >
+				<INPUT name=FRMonth type=text  maxlength="25" value="<%=FrMonth%>" > </td>
+		<td  class=Head2> <b>To</b> </td>
+		<td  class=Head3 >
+				<INPUT type=text name=ToMonth style="HEIGHT: 22px; WIDTH: 152px" maxlength="25" value="<%=ToMonth%>"> </td></tr>
+	<tr>
+		<td  class=Head2 align="right" nowrap>Format of  Date</td>
+		<td  class=Head3 colspan = 3>YYYYMMDD   ( Ex. 20050501)</td>				
+
+	</tr>
+	<tr> 
+		<td colspan=6 align=left><br> <input type=hidden name=iPage value=1> 
+		<a href="JavaScript:CheckMonth()"><img src="IMAGES/Print.gif" alt="Print" vspace="5" border="0"></a> </td> </tr>
+	</table>
+	</td></tr>
+	</table>
+	</form>
+</BODY>
+</HTML>

@@ -1,0 +1,160 @@
+<!-- #INCLUDE file = "FunctionDB.inc" -->
+<!-- #include file = "ScriptLibrary/Conn_Func.asp" -->
+<!-- #include file = "ScriptLibrary/Global_Var.asp"-->
+<%	
+
+Function PrintDetail()
+Dim curCus
+Dim intStart,intNo
+intCurrRow = 5
+intStart = 0
+intNo =1
+ With ExcelApp		
+		.cells(3,2).value = "As  " & right(FrMonth,2)  &"/" & mid(FrMonth,5,2)  &"/" & left(FrMonth,4)& " - " &   right(ToMonth,2)  &"/" & mid(ToMonth,5,2)  &"/" & left(ToMonth,4)
+		.cells(2,13).Value=  "Printdate  :  " & now()
+	  	.cells(3,13).Value=  "Print by     :  " &session("userId")  & " - " & session("username") 
+		curCus = AS400File_rs("Customer").value
+		cusName = AS400File_rs("customername").value
+		While NOT AS400File_rs.EOF 
+			if  curCus <>  trim(AS400File_rs("Customer").value)  Then				
+				intCurrRow=intCurrRow+1
+				if  intCurrRow =  intNextPage Then  intNextPage = intNextPage +1
+				 intCurCol = 7
+				While intCurCol <= 14
+					.cells(intCurrRow,intCurCol).Select
+					.ActiveCell.FormulaR1C1 = "= SUM(R["  & - intStart & "]C:R[-1]C)"
+					intCurCol =intCurCol +1
+				wEnd
+				.Range("A"& intCurrRow  &":O"& intCurrRow).Interior.ColorIndex = 8
+				.cells(intCurrRow ,2).value =" SUB Total ( " & curCus &" -" & cusName &")"
+				.Range("A"& intCurrRow  &":O"& intCurrRow).Font.Bold = True
+				.Rows(intCurrRow  & ":"  & intCurrRow).RowHeight =	18
+				curCus =  AS400File_rs("Customer").value
+				cusName = AS400File_rs("customername").value
+				intStart = 0
+			End if 
+			if intCurrRow +1=  intNextPage Then
+				.Rows("6:47").Select:	 
+				.Selection.Copy
+				.Rows(intNextPage).Select:	 
+				.ActiveSheet.Paste
+				.Selection.ClearContents
+				.Selection.Interior.ColorIndex = xlNone
+				.Selection.Font.Bold = False
+				intNextPage=intNextPage+42
+			End if					
+			intCurrRow=intCurrRow+1
+			.cells(intCurrRow,1).value = IntNo
+			.cells(intCurrRow,2).value = AS400File_rs("invoiceNo").value
+			.cells(intCurrRow,3).value = right(trim(AS400File_rs("invoicedate").value),2)  &"/" & mid(AS400File_rs("invoicedate").value,3,2)  &"/" & CINT(left(trim(AS400File_rs("invoicedate").value),2) +2000)  
+			.cells(intCurrRow,4).value = AS400File_rs("Customer").value &"-"& AS400File_rs("customername").value
+			.cells(intCurrRow,5).value = AS400File_rs("Deto").value												
+			.cells(intCurrRow,6).value = AS400File_rs("Desc").value
+			.cells(intCurrRow,7).value = AS400File_rs("Price").value
+			.cells(intCurrRow,8).value = AS400File_rs("QTY").value
+			.cells(intCurrRow,9).value = AS400File_rs("AMounT").value 
+			.cells(intCurrRow,10).value =  ROUND(cdbl(AS400File_rs("Price").value) * CDBL(AS400File_rs("QTY").value)*0.07,2)
+			.cells(intCurrRow,11).value =   .cells(intCurrRow,9)  + .cells(intCurrRow,10) 
+			.cells(intCurrRow,12).value = AS400File_rs("FC").value
+			.cells(intCurrRow,13).value = AS400File_rs("AmountFC").value
+			.cells(intCurrRow,14).value = CDBL(.cells(intCurrRow,9).value) - CDBL(AS400File_rs("AmountFC").value)
+			AS400File_rs.Movenext
+			intStart =intStart +1
+			IntNo = IntNo+1
+		WEnd
+		intCurrRow=intCurrRow+1
+		 intCurCol = 7
+		While intCurCol <= 14
+			.cells(intCurrRow,intCurCol).Select
+			.ActiveCell.FormulaR1C1 = "= SUM(R["  & - intStart & "]C:R[-1]C)"
+			intCurCol =intCurCol +1
+		wEnd
+'		.Range("A" & intCurrRow &":F" & intCurrRow).Merge
+		.Range("A"& intCurrRow  &":O"& intCurrRow).Interior.ColorIndex = 8
+		.cells(intCurrRow ,2).value =" SubTotal ( " & .cells(intCurrRow-1,4).value &")"
+		.Range("A"& intCurrRow  &":O"& intCurrRow).Font.Bold = True
+		.Rows(intCurrRow  & ":"  & intCurrRow).RowHeight =	18
+	End With
+End Function
+
+	SaleCode            	=  Request.Form("Sales")
+	FrCustomer        	= Request.Form("FrCustomer")
+	ToCustomer       	= Request.Form("ToCustomer")
+	FrProductCode	= Request.Form("FrProductCode")
+	ToProductCode	= Request.Form("ToProductCode")
+	FrMonth		= Request.Form("FrMonth")
+	ToMonth		= Request.Form("ToMonth")
+
+DIM PRec,rsSumFac,rsSumPT,intNextPage
+Dim intMonth , aMthName(12), AllM()
+Dim rsSale ,strSale ,rsGrandTotal ,intYear ,intM
+Dim intRun
+aMthName(1)= "JANUARY":aMthName(2)="FEBRUARY":aMthName(3)="MARCH":aMthName(4)= "APRIL":aMthName(5)="MAY"
+aMthName(6)="JUNE":aMthName(7)="JULY":aMthName(8)="AUGUST":aMthName(9)="SEPTEMBER":aMthName(10)="OCTOBER"
+aMthName(11)="NOVEMBER":aMthName(12)="DECEMBER"
+
+	ConnectionString = "Provider=IBMDA400;Data Source=10.200.1.5;"
+	Set AS400Connection = Server.CreateObject("ADODB.Connection")
+	Set AS400Command = Server.CreateObject("ADODB.Command")
+	AS400Connection.Open ConnectionString,"winij","wong"
+	AS400Command.ActiveConnection = AS400Connection
+
+	condition   = " hstat in ('7','8')  "
+	condition   = condition   & " AND (siinvd  >=" & Right(FrMonth,6)  &") AND (siinvd  <= " & Right(TOMonth,6) & ")"
+	
+	if FrCustomer <> "" then
+		condition   = condition     & " AND YSSH.HIBTCD >= " & sqlae(FrCustomer)
+	end if
+
+	if ToCustomer <> "" then
+		condition    = condition  & " AND YSSH.HIBTCD <= " & sqlae(ToCustomer)
+	end if
+	
+	sql = sql & "Select h.siinvn as invoiceNo,h.siinvd as InvoiceDate,h.sicust as Customer,c.cnme as CustomerName,"
+	sql = sql & " h.siatn as DeTo,p.IDSCE as desc,d.ilnet as Price,d.ilqty as QTY,h.sitot-h.sitax as Amount,d.ilta10 as FC,d.ilta10* d.ilqty  as AmountFC"
+	sql = sql & " From tylinv.sih h inner join tylinv.sil d On siinvn = ilinvn  Left Outer Join tylinv.trcm c On h.sicust = c.ccust"
+	sql = sql & " Left Outer Join tylinv.tiim p On  d.ilprod = p.iprod  Inner Join tylinv.ech o On h.siord = o.hord "
+	sql = sql & " WHERE " & condition 
+	sql = sql & " Order By Customer,DeTo,invoiceno,InvoiceDate "
+
+'Response.write sql
+'Response.End()
+	CommandType = adCmdText
+	AS400Command.CommandText = sql
+	Set AS400File_rs = AS400Command.Execute	
+	IF AS400File_rs.EOF  Then
+		response.write  "Order No. : " & Request.Form("OrderNo")  &"       Not found"	
+		response.end()
+	End if
+	NumSheet =AS400File_rs.recordcount    
+   If AS400File_rs.EOF Then
+	Response.Write("NO DATA...")
+	Response.End()
+    End If	
+
+    Set ExcelApp = Server.CreateObject("Excel.Application")    	    
+	set ExcelBook = ExcelApp.WorkBooks.Open ( Session("RptPath") & "TYL-SALEREPORT.xlt")	
+	Set xlSheet = ExcelBook.Worksheets(1)
+	ExcelApp.DisplayAlerts = False	
+	intNextPage = 48
+   	Call PrintDetail()	
+	intRun = 1
+	FileName = "TLY-SALE-"  & year(date())  & "-" &  month(date())  & "-" &  day(date())  & "-" & intRun &  "-" &   trim(strSale) & ".xls"
+	set FileExcel = Server.CreateObject("Scripting.FileSystemObject")
+    do while FileExcel.FileExists( Session("tmpPath") & FileName)
+		FileName = "TYL-SALE-"  & year(date())  & "-" &  month(date())  & "-" &  day(date())  & "-" & intRun &  "-" &  trim(strSale) & ".xls"
+		intRun = intRun +1
+	loop
+	ExcelBook.Saveas  Session("tmpPath") & "TYL/" &FileName
+	ExcelApp.Application.Quit
+	Set ExcelApp = Nothing 
+	strTemp = "/salesweb/tmp/TYL/" & FileName
+%>
+<!-- <meta http-equiv="refresh" content="0;URL=<%=strTemp%>"> -->
+<form name="PrintRefresh" ID="Form01">
+	<input type="hidden" name="links" value="<%=strTemp%>" ID="Hidden01">
+</form>
+<script language="VBScript">
+	window.open(PrintRefresh.links.value)
+	window.close
+</script>
